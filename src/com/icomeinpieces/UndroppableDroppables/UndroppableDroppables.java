@@ -8,6 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 /*
  * Changelog:
+ * 1.5 fixed the bug that prevented worldguard from protecting blocks listed in this plugin
  * 1.4 added dropping grass blocks not dirt when grass is broken
  * 1.3 Fixed (hopefully) the spawning water problem and some code clean up.
  * 1.2 Added dropping Ice
@@ -18,7 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class UndroppableDroppables extends JavaPlugin{
 	public final static Logger log = Logger.getLogger("Minecraft");
 	private final UDBlockListener cookies = new UDBlockListener(this);
-	private final String pluginName = "UndroppableDroppables v1.4";
+	private final String pluginName = "UndroppableDroppables v1.5";
 
 	public void onDisable() {
 		log.info(pluginName + " Disabled");
