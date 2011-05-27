@@ -1,79 +1,244 @@
 package com.icomeinpieces.UndroppableDroppables;
 
+import java.util.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.inventory.ItemStack;
 
-public class UDBlockListener extends BlockListener{
-	
-	public static UndroppableDroppables plugin;
+public class UDBlockListener extends BlockListener
+{
+	public static UndroppableDroppables UDP;
+	public final static Logger log = Logger.getLogger("Minecraft");
 	public UDBlockListener(UndroppableDroppables instance)
 	{
-	    plugin = instance;
+	    UDP = instance;
 	}
 	public void onBlockBreak(BlockBreakEvent event) {
-		int blockInQuestion = event.getBlock().getTypeId();
-		if (blockInQuestion == 47) //bookcases drop bookcases not nothing
+		Player player = event.getPlayer();
+		Block block = event.getBlock();
+		World world = player.getWorld();
+		boolean wgAllowed;
+		boolean pbAllowed;
+		if (UndroppableDroppables.permissionHandler != null)
 		{
-	        Location locy = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
-	        if (event.getBlock().getTypeId() != blockInQuestion)
-	        {
-	        	event.getBlock().getWorld().dropItem(locy, new ItemStack(blockInQuestion, 1, (short) 1));
-	        }
+			String playerGroup = UndroppableDroppables.permissionHandler.getGroup(world.getName(), player.getName());
+			if (UndroppableDroppables.permissionHandler.canGroupBuild(world.getName(), playerGroup))
+			{
+				pbAllowed = true;
+			}
+			else
+			{
+				pbAllowed = false;
+			}
 		}
-		if (blockInQuestion == 53) //wooden stairs drops wooden stairs not wood
+		else
 		{
-	        Location locy = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
-	        if (event.getBlock().getTypeId() != blockInQuestion)
-	        {
-	        	event.getBlock().getWorld().dropItem(locy, new ItemStack(blockInQuestion, 1, (short) 1));
-	        }
+			pbAllowed = true;
 		}
-		if (blockInQuestion == 67) // stone stairs drops stone stairs not cobblestone
+		if (UndroppableDroppables.WGP != null)
 		{
-	        Location locy = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
-	        if (event.getBlock().getTypeId() != blockInQuestion)
-	        {
-	        	event.getBlock().getWorld().dropItem(locy, new ItemStack(blockInQuestion, 1, (short) 1));
-	        }
+			if (UndroppableDroppables.WGP.canBuild(player, block))
+			{
+				wgAllowed = true;
+			}
+			else
+			{
+				wgAllowed = false;
+			}
 		}
-		if (blockInQuestion == 89) //glowstone drops glowstone not dust
+		else
 		{
-	        Location locy = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
-	        if (event.getBlock().getTypeId() != blockInQuestion)
-	        {
-	        	event.getBlock().getWorld().dropItem(locy, new ItemStack(blockInQuestion, 1, (short) 1));
-	        }
+			wgAllowed = true;
 		}
-		if (blockInQuestion == 20) //glass drops glass not nothing
+//		if(!event.isCancelled())
+//		{
+//			log.info("event was not canceled");
+//		}
+//		else
+//		{
+//			log.info("event was cneceled");
+//		}
+		if (wgAllowed && pbAllowed)
 		{
-	        Location locy = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
-	        if (event.getBlock().getTypeId() != blockInQuestion)
-	        {
-	        	event.getBlock().getWorld().dropItem(locy, new ItemStack(blockInQuestion, 1, (short) 1));
-	        }
+			if (block.getTypeId() == 47) //bookcases drop bookcases not nothing
+			{
+		        Location locale = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
+		        switch (UndroppableDroppables.bookshelfDrop)
+		        {
+		        case 0:
+		        {
+		        	break;
+		        }
+		        case 1:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(47, 1, (short) 1));
+		        	break;
+		        }
+		        case 2:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(340, 3));
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(5, 6));
+		        	break;
+		        }
+		        }
+		        event.setCancelled(true);
+		        event.getBlock().setType(Material.AIR);
+			}
+			if (block.getTypeId() == 53) //wooden stairs drops wooden stairs not wood
+			{
+		        Location locale = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
+		        switch (UndroppableDroppables.woodenstairsDrop)
+		        {
+		        case 0:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(5, 1, (short) 1));
+		        	break;
+		        }
+		        case 1:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(53, 1, (short) 1));
+		        	break;
+		        }
+		        case 2:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(5, 6));
+		        	break;
+		        }
+		        }
+		        event.setCancelled(true);
+		        event.getBlock().setType(Material.AIR);
+			}
+			if (block.getTypeId() == 67) // stone stairs drops stone stairs not cobblestone
+			{
+		        Location locale = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
+		        switch (UndroppableDroppables.cobblestonestairsDrop)
+		        {
+		        case 0:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(4, 1, (short) 1));
+		        	break;
+		        }
+		        case 1:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(67, 1, (short) 1));
+		        	break;
+		        }
+		        case 2:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(4, 6));
+		        	break;
+		        }
+		        }
+		        event.setCancelled(true);
+		        event.getBlock().setType(Material.AIR);
+			}
+			if (block.getTypeId() == 89) //glowstone drops glowstone not dust
+			{
+		        Location locale = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
+		        switch (UndroppableDroppables.glowstoneDrop)
+		        {
+		        case 0:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(348, 1, (short) 1));
+		        	break;
+		        }
+		        case 1:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(89, 1, (short) 1));
+		        	break;
+		        }
+		        case 2:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(348, 9));
+		        	break;
+		        }
+		        }
+		        event.setCancelled(true);
+		        event.getBlock().setType(Material.AIR);
+			}
+			if (block.getTypeId() == 20) //glass drops glass not nothing
+			{
+		        Location locale = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
+		        switch (UndroppableDroppables.glassDrop)
+		        {
+		        case 0:
+		        {
+		        	break;
+		        }
+		        case 1:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(20, 1));
+		        	break;
+		        }
+		        case 2:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(12, 1));
+		        	break;
+		        }
+		        }
+		        event.setCancelled(true);
+		        event.getBlock().setType(Material.AIR);
+			}
+			if (block.getTypeId() == 79) //ice drops ice not water in it's place
+			{
+		        Location locale = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
+		        switch (UndroppableDroppables.iceDrop)
+		        {
+		        case 0:
+		        {
+		        	break;
+		        }
+		        case 1:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(79, 1));
+		        	break;
+		        }
+		        case 2:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(79, 1));
+		        	break;
+		        }
+		        }
+		        event.setCancelled(true);
+		        event.getBlock().setType(Material.AIR);
+			}
+			if (block.getTypeId() == 2) //grass drops grass not dirt add occasional seeds?
+			{
+		        Location locale = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
+		        switch (UndroppableDroppables.grassDrop)
+		        {
+		        case 0:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(3, 1));
+		        	break;
+		        }
+		        case 1:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(2, 1));
+		        	break;
+		        }
+		        case 2:
+		        {
+		        	event.getBlock().getWorld().dropItem(locale, new ItemStack(295, 1));
+		        	break;
+		        }
+		        }
+		        event.setCancelled(true);
+		        event.getBlock().setType(Material.AIR);
+			}
+			if (block.getTypeId() == 8 && UndroppableDroppables.iceDrop == 1) //handles the water that generates after an ice block is broken
+			{
+				event.getBlock().setType(Material.AIR);
+			}
 		}
-		if (blockInQuestion == 79) //ice drops ice not water in it's place
+		else
 		{
-	        Location locy = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
-	        if (event.getBlock().getTypeId() != blockInQuestion)
-	        {
-	        	event.getBlock().getWorld().dropItem(locy, new ItemStack(blockInQuestion, 1, (short) 1));
-	        }
-		}
-		if (blockInQuestion == 2) //grass drops grass not dirt add occasional seeds?
-		{
-	        Location locy = new Location(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ(), 0.0F, 0.0F);
-	        if (event.getBlock().getTypeId() != blockInQuestion)
-	        {
-	        	event.getBlock().getWorld().dropItem(locy, new ItemStack(blockInQuestion, 1, (short) 1));
-	        }
-		}
-		if (event.getBlock().getTypeId() == 8) //handles the water that generates after an ice block is broken
-		{
-			event.getBlock().setType(Material.AIR);
+			log.info("Something went wrong with WorldGuard or Permissions detection, please advise author");
 		}
 	}
 }
