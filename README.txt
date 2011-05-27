@@ -1,1 +1,1 @@
-simple readme to get github.com to stop pestering me about one :)
+UdroppableDroppables - a simple plugin for CraftBukkit minecraft server.
