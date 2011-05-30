@@ -17,6 +17,7 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 
 /*
  * Changelog:
+ * 1.10 added boat dropping options
  * 1.09 added a config file for additional configurations
  * 1.08 fixed the bug preventing UndroppableDroppables from starting if WorldGuard or Permissions were not present
  * 1.07 added checks to disable plugin in the event the required permissions and worldedit are not present
@@ -30,21 +31,23 @@ import com.nijikokun.bukkit.Permissions.Permissions;
  */
 
 public class UndroppableDroppables extends JavaPlugin{
-	public final static Logger log = Logger.getLogger("Minecraft");
-	private final UDBlockListener udBlocklistner = new UDBlockListener(this);
+	public final Logger log = Logger.getLogger("Minecraft");
+	private final UDBlockListener udBlockListner = new UDBlockListener(this);
+	private final UDVehicleListener udVehicleListner = new UDVehicleListener(this);
 	public static WorldGuardPlugin WGP;
 	public static PermissionHandler permissionHandler;
 	private PluginManager pm;
-	private final String pluginName = "UndroppableDroppables v1.09";
+	private final String pluginName = "UndroppableDroppables v1.10";
 	private String filePath = "/UndroppableDroppables.cfg";
 	
-	public static int bookshelfDrop=1;
-	public static int glowstoneDrop=1;
-	public static int woodenstairsDrop=1;
-	public static int cobblestonestairsDrop=1;
-	public static int glassDrop=1;
-	public static int iceDrop=1;
-	public static int grassDrop=1;
+	public int bookshelfDrop=1;
+	public int glowstoneDrop=1;
+	public int woodenstairsDrop=1;
+	public int cobblestonestairsDrop=1;
+	public int glassDrop=1;
+	public int iceDrop=1;
+	public int grassDrop=1;
+	public int boatDrop=1;
 
 	public void onDisable() {
 		log.info(pluginName + " Disabled");
@@ -53,15 +56,16 @@ public class UndroppableDroppables extends JavaPlugin{
 
 	public void onEnable() {
 		log.info(pluginName + " Starting");
+		pm = getServer().getPluginManager();
+		pm.registerEvent(Event.Type.BLOCK_BREAK, this.udBlockListner, Event.Priority.Normal, this);
+		pm.registerEvent(Event.Type.VEHICLE_DESTROY, this.udVehicleListner, Event.Priority.Normal, this);
 		setupWorldGuard();
 		setupPermissions();
-		pm = getServer().getPluginManager();
-		pm.registerEvent(Event.Type.BLOCK_BREAK, this.udBlocklistner, Event.Priority.Highest, this);
-		onReload();
+		Reload();
 		log.info(pluginName + " Enabled");
 	}
 	
-	public void onReload()
+	public void Reload()
 	{
 		File configFile = new File(getDataFolder()+ filePath);
 		if (configFile.exists())
@@ -85,6 +89,8 @@ public class UndroppableDroppables extends JavaPlugin{
 	        if (iceDrop!=0 && iceDrop!=1 && iceDrop!=2) iceDrop=1;
 	        grassDrop = Integer.parseInt(config.getProperty("grass"));
 	        if (grassDrop!=0 && grassDrop!=1 && grassDrop!=2) grassDrop=1;
+	        boatDrop = Integer.parseInt(config.getProperty("boat"));
+	        if (boatDrop!=0 && boatDrop!=1 && boatDrop!=2) boatDrop=1;
 	        }
 	        catch (IOException e)
 	        {
@@ -118,6 +124,7 @@ public class UndroppableDroppables extends JavaPlugin{
 	         try
 	         {
 	        	 PrintWriter out = new PrintWriter(new FileWriter(getDataFolder()+filePath));
+	        	 out.println("#This is the configuration file for " + pluginName);
 	        	 out.println("#set to option 0 for any one option to disable plugin function for that block");
 	        	 out.println("#set to option 1 for " + pluginName + " based behaviour");
 	        	 out.println("#set to option 2 for special behaviour, commonly the return of the resources that made a given block");
@@ -136,6 +143,8 @@ public class UndroppableDroppables extends JavaPlugin{
 		         out.println("ice="+iceDrop);
 		         out.println("#option 2 gives seeds (just for fun), since grass is not built or crafted");
 		         out.println("grass="+grassDrop);
+		         out.println("#option 2 gives 5 wooden planks back");
+		         out.println("boat="+boatDrop);
 		         out.close();
 		    	 log.info(pluginName + " config file written to " + filePath);
 	         }
