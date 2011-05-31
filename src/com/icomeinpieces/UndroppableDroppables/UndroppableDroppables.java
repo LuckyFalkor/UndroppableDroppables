@@ -17,6 +17,7 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 
 /*
  * Changelog:
+ * 1.11 add per material permissions
  * 1.10 added boat dropping options
  * 1.09 added a config file for additional configurations
  * 1.08 fixed the bug preventing UndroppableDroppables from starting if WorldGuard or Permissions were not present
@@ -27,7 +28,7 @@ import com.nijikokun.bukkit.Permissions.Permissions;
  * 1.03 Fixed (hopefully) the spawning water problem and some code clean up.
  * 1.02 Added dropping Ice
  * 1.01 Added dropping Glowstone, Wooden/Cobblestone Stairs, and Glass
- * 1.0 Initial release - supported dropping Bookcases only.
+ * 1.00 Initial release - supported dropping Bookcases only.
  */
 
 public class UndroppableDroppables extends JavaPlugin{
@@ -35,19 +36,20 @@ public class UndroppableDroppables extends JavaPlugin{
 	private final UDBlockListener udBlockListner = new UDBlockListener(this);
 	private final UDVehicleListener udVehicleListner = new UDVehicleListener(this);
 	public static WorldGuardPlugin WGP;
-	public static PermissionHandler permissionHandler;
+	public PermissionHandler permissionHandler;
 	private PluginManager pm;
-	private final String pluginName = "UndroppableDroppables v1.10";
+	private final String pluginName = "UndroppableDroppables v1.11";
 	private String filePath = "/UndroppableDroppables.cfg";
 	
-	public int bookshelfDrop=1;
-	public int glowstoneDrop=1;
-	public int woodenstairsDrop=1;
-	public int cobblestonestairsDrop=1;
-	public int glassDrop=1;
-	public int iceDrop=1;
-	public int grassDrop=1;
-	public int boatDrop=1;
+	public Integer bookshelfDrop=1;
+	public Integer glowstoneDrop=1;
+	public Integer woodenstairsDrop=1;
+	public Integer cobblestonestairsDrop=1;
+	public Integer glassDrop=1;
+	public Integer iceDrop=1;
+	public Integer grassDrop=1;
+	public Integer boatDrop=1;
+	//public Integer spawnerDrop=1;
 
 	public void onDisable() {
 		log.info(pluginName + " Disabled");
@@ -145,6 +147,15 @@ public class UndroppableDroppables extends JavaPlugin{
 		         out.println("grass="+grassDrop);
 		         out.println("#option 2 gives 5 wooden planks back");
 		         out.println("boat="+boatDrop);
+		         out.println("#");
+		         out.println("#available permission nodes:");
+		         out.println("#ud.drop.bookcase");
+		         out.println("#ud.drop.woodenstairs");
+		         out.println("#ud.drop.cobblestonestairs");
+		         out.println("#ud.drop.glowstone");
+		         out.println("#ud.drop.glass");
+		         out.println("#ud.drop.ice");
+		         out.println("#ud.drop.grass");
 		         out.close();
 		    	 log.info(pluginName + " config file written to " + filePath);
 	         }
@@ -162,9 +173,9 @@ public class UndroppableDroppables extends JavaPlugin{
 	private boolean setupPermissions() {
 	      Plugin permissionsPlugin = this.getServer().getPluginManager().getPlugin("Permissions");
 
-	      if (UndroppableDroppables.permissionHandler == null) {
+	      if (permissionHandler == null) {
 	          if (permissionsPlugin != null) {
-	              UndroppableDroppables.permissionHandler = ((Permissions) permissionsPlugin).getHandler();
+	              permissionHandler = ((Permissions) permissionsPlugin).getHandler();
 	              log.info(pluginName + ": Permission system detected");
 	              return true;
 	          } else {

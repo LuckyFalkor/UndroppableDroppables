@@ -2,6 +2,7 @@ package com.icomeinpieces.UndroppableDroppables;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Boat;
+import org.bukkit.entity.Player;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.vehicle.VehicleListener;
 import org.bukkit.inventory.ItemStack;
@@ -18,7 +19,16 @@ public class UDVehicleListener extends VehicleListener
 	{
 		if (!event.isCancelled())
 		{
-			if (event.getVehicle() instanceof Boat)
+			Player player = null;
+			if (event.getAttacker() instanceof Player) 
+			{
+				player = (Player) event.getAttacker();
+			}
+			else
+			{
+				UDP.log.info("UDP event trigger: non player attacker");
+			}
+			if (event.getVehicle() instanceof Boat && player!=null &&(UDP).permissionHandler.has(player, "ud.drop.boat"))
 			{
 				Location locale = new Location(event.getVehicle().getWorld(), event.getVehicle().getLocation().getX(), event.getVehicle().getLocation().getY(), event.getVehicle().getLocation().getZ(), 0.0F, 0.0F);
 				if (!event.getVehicle().isEmpty())
