@@ -192,10 +192,6 @@ public class UDBlockListener extends BlockListener
 					event.getBlock().setType(Material.AIR);
 				}
 			}
-			else
-			{
-				UDP.log.info("Something went wrong with WorldGuard or Permissions detection, please advise author");
-			}
 		}
 	}
 	private boolean checkPB(Player player)

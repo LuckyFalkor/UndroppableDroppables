@@ -17,6 +17,7 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 
 /*
  * Changelog:
+ * 1.12 fixed a bug that when a player didn't have a build permission due to permissions or worldguard, would spam console messages
  * 1.11 add per material permissions
  * 1.10 added boat dropping options
  * 1.09 added a config file for additional configurations
@@ -38,7 +39,7 @@ public class UndroppableDroppables extends JavaPlugin{
 	public static WorldGuardPlugin WGP;
 	public PermissionHandler permissionHandler;
 	private PluginManager pm;
-	private final String pluginName = "UndroppableDroppables v1.11";
+	private final String pluginName = "UndroppableDroppables v1.12";
 	private String filePath = "/UndroppableDroppables.cfg";
 	
 	public Integer bookshelfDrop=1;
@@ -127,6 +128,7 @@ public class UndroppableDroppables extends JavaPlugin{
 	         {
 	        	 PrintWriter out = new PrintWriter(new FileWriter(getDataFolder()+filePath));
 	        	 out.println("#This is the configuration file for " + pluginName);
+	        	 out.println("#");
 	        	 out.println("#set to option 0 for any one option to disable plugin function for that block");
 	        	 out.println("#set to option 1 for " + pluginName + " based behaviour");
 	        	 out.println("#set to option 2 for special behaviour, commonly the return of the resources that made a given block");
@@ -156,6 +158,7 @@ public class UndroppableDroppables extends JavaPlugin{
 		         out.println("#ud.drop.glass");
 		         out.println("#ud.drop.ice");
 		         out.println("#ud.drop.grass");
+		         out.println("#ud.drop.boat");
 		         out.close();
 		    	 log.info(pluginName + " config file written to " + filePath);
 	         }
