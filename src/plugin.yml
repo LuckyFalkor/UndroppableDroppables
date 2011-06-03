@@ -1,5 +1,9 @@
 name: UndroppableDroppables
 main: com.icomeinpieces.UndroppableDroppables.UndroppableDroppables
-version: 1.5
-description: want to pick up that Glowstone as Glowstone, or that bookcase but can't well now you can. pick up glowstone, ice, bookcases, glass, both types of stairs, and grass.
+version: 1.12
+description: makes most things that don't drop something like bookcases well drop something like a bookcase
 author: icomeinpieces
+commands:
+    udreload:
+        description: test command.
+        usage: /<command>

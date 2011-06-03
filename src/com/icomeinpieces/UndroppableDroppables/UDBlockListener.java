@@ -16,6 +16,9 @@ public class UDBlockListener extends BlockListener
 	{
 	    UDP = instance;
 	}
+	
+	
+	
 	public void onBlockBreak(BlockBreakEvent event) {
 		if (!event.isCancelled())
 		{

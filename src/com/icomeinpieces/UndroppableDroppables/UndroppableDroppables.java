@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Properties;
 import java.util.logging.Logger;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -17,7 +20,8 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 
 /*
  * Changelog:
- * 1.12 fixed a bug that when a player didn't have a build permission due to permissions or worldguard, would spam console messages
+ * 1.13 added /udreload command to allow reloading the config file without having to do a server shutdown.
+ * 1.12 fixed a bug that when a player didn't have a build permission due to permissions or worldguard, the plugin would spam console messages
  * 1.11 add per material permissions
  * 1.10 added boat dropping options
  * 1.09 added a config file for additional configurations
@@ -39,8 +43,10 @@ public class UndroppableDroppables extends JavaPlugin{
 	public static WorldGuardPlugin WGP;
 	public PermissionHandler permissionHandler;
 	private PluginManager pm;
-	private final String pluginName = "UndroppableDroppables v1.12";
+	private final String pluginName = "UndroppableDroppables v1.13 ";
 	private String filePath = "/UndroppableDroppables.cfg";
+	private static UndroppableDroppables instance;
+	
 	
 	public Integer bookshelfDrop=1;
 	public Integer glowstoneDrop=1;
@@ -50,22 +56,27 @@ public class UndroppableDroppables extends JavaPlugin{
 	public Integer iceDrop=1;
 	public Integer grassDrop=1;
 	public Integer boatDrop=1;
-	//public Integer spawnerDrop=1;
 
-	public void onDisable() {
-		log.info(pluginName + " Disabled");
+	public static UndroppableDroppables getIstance()
+	{
+		return instance;
+	}
+	
+	public void onDisable() 
+	{
+		log.info(pluginName + "Disabled");
 		writeConfigFile();
 	}
 
 	public void onEnable() {
-		log.info(pluginName + " Starting");
+		log.info(pluginName + "Starting");
 		pm = getServer().getPluginManager();
 		pm.registerEvent(Event.Type.BLOCK_BREAK, this.udBlockListner, Event.Priority.Normal, this);
 		pm.registerEvent(Event.Type.VEHICLE_DESTROY, this.udVehicleListner, Event.Priority.Normal, this);
 		setupWorldGuard();
 		setupPermissions();
 		Reload();
-		log.info(pluginName + " Enabled");
+		log.info(pluginName + "Enabled");
 	}
 	
 	public void Reload()
@@ -97,13 +108,13 @@ public class UndroppableDroppables extends JavaPlugin{
 	        }
 	        catch (IOException e)
 	        {
-	        	log.warning(pluginName + " unable to read the config file, restoring to defaults");
+	        	log.warning(pluginName + "unable to read the config file, restoring to defaults");
 	        	writeConfigFile();
 	        }
 	     }
 	     else
 	     {
-	    	 log.warning(pluginName + " config file does not exist, ignore this if this is the first start. writing config file");
+	    	 log.warning(pluginName + "config file does not exist, ignore this if this is the first start. writing config file");
 	    	 writeConfigFile();
 	     }
 	}
@@ -115,7 +126,7 @@ public class UndroppableDroppables extends JavaPlugin{
 	     if (!dir.exists())
 	     {
 	    	 dir.mkdir();
-	    	 log.info(pluginName + " data directory created");
+	    	 log.info(pluginName + "data directory created");
 	     }
 	     if (configFile.exists())
 	     {
@@ -160,19 +171,42 @@ public class UndroppableDroppables extends JavaPlugin{
 		         out.println("#ud.drop.grass");
 		         out.println("#ud.drop.boat");
 		         out.close();
-		    	 log.info(pluginName + " config file written to " + filePath);
+		    	 log.info(pluginName + "config file written to " + filePath);
 	         }
 	                catch (IOException e)
 	         {
-	                	log.warning(pluginName + " unable to write to file at " + filePath);
+	                	log.warning(pluginName + "unable to write to file at " + filePath);
 	         }
 	     }
 	     catch(IOException ioe)
 	     {
-	    	 log.warning(pluginName + " unable to create config file");
+	    	 log.warning(pluginName + "unable to create config file");
 	     }
 	}
 	
+	@Override
+	public boolean onCommand( CommandSender sender, Command cmd, String commandLabel, String[] args ) 
+	{
+		Player player = null;
+		if (sender instanceof Player)
+		{
+			player = (Player) sender;
+			if (commandLabel.equalsIgnoreCase("udreload"))
+			{
+				if(permissionHandler.has(player, "ud.admin.reload"))
+				{
+					player.sendMessage(pluginName + "configuration reload");
+					Reload();
+				}
+				else
+				{
+					player.sendMessage(pluginName + "you do not have permission to use the udreload command");
+				}
+			}
+		}
+		return true;
+	}
+
 	private boolean setupPermissions() {
 	      Plugin permissionsPlugin = this.getServer().getPluginManager().getPlugin("Permissions");
 
