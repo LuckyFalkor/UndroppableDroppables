@@ -9,6 +9,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
@@ -27,7 +28,7 @@ import com.nijikokun.bukkit.Permissions.Permissions;
  * 1.09 added a config file for additional configurations
  * 1.08 fixed the bug preventing UndroppableDroppables from starting if WorldGuard or Permissions were not present
  * 1.07 added checks to disable plugin in the event the required permissions and worldedit are not present
- * 1.06 Introduced permissions integration so that UndroppableDroppable listed blocks are now properly protected via he build permisions
+ * 1.06 Introduced permissions integration so that UndroppableDroppable listed blocks are now properly protected via he build permissions
  * 1.05 introduced worldguard integration so that UndroppableDroppable listed blocks are now properly protected via regions.
  * 1.04 added dropping grass blocks not dirt when grass is broken
  * 1.03 Fixed (hopefully) the spawning water problem and some code clean up.
@@ -43,7 +44,7 @@ public class UndroppableDroppables extends JavaPlugin{
 	public static WorldGuardPlugin WGP;
 	public PermissionHandler permissionHandler;
 	private PluginManager pm;
-	private final String pluginName = "UndroppableDroppables v1.13 ";
+	private final String pluginName = "UndroppableDroppables v1.13: ";
 	private String filePath = "/UndroppableDroppables.cfg";
 	private static UndroppableDroppables instance;
 	
@@ -187,20 +188,30 @@ public class UndroppableDroppables extends JavaPlugin{
 	@Override
 	public boolean onCommand( CommandSender sender, Command cmd, String commandLabel, String[] args ) 
 	{
+		ConsoleCommandSender console = null;
 		Player player = null;
+		if (sender instanceof ConsoleCommandSender)
+		{
+			console = (ConsoleCommandSender) sender;
+			if (commandLabel.equalsIgnoreCase("udreload"))
+			{
+				Reload();
+				console.sendMessage(pluginName + "configuration reloaded");
+			}
+		}
 		if (sender instanceof Player)
 		{
 			player = (Player) sender;
 			if (commandLabel.equalsIgnoreCase("udreload"))
 			{
-				if(permissionHandler.has(player, "ud.admin.reload"))
+				if(permissionHandler.has(player, "ud.admin.reload") || player.isOp())
 				{
-					player.sendMessage(pluginName + "configuration reload");
 					Reload();
+					player.sendMessage(pluginName + "configuration reloaded");
 				}
 				else
 				{
-					player.sendMessage(pluginName + "you do not have permission to use the udreload command");
+					player.sendMessage(pluginName + "you are not allowed to use the udreload command");
 				}
 			}
 		}
@@ -213,14 +224,14 @@ public class UndroppableDroppables extends JavaPlugin{
 	      if (permissionHandler == null) {
 	          if (permissionsPlugin != null) {
 	              permissionHandler = ((Permissions) permissionsPlugin).getHandler();
-	              log.info(pluginName + ": Permission system detected");
+	              log.info(pluginName + "Permission system detected");
 	              return true;
 	          } else {
-	              log.info(pluginName + ": Permission system not detected");
+	              log.info(pluginName + "Permission system not detected");
 	              return true;
 	          }
 	      }
-	      log.info("critical error in detecting Permissions. please advise author");
+	      log.info(pluginName + "critical error in detecting Permissions. please advise author");
 		return false;
 	  }
 	 private boolean setupWorldGuard() {
@@ -228,15 +239,15 @@ public class UndroppableDroppables extends JavaPlugin{
 
 	      if (UndroppableDroppables.WGP == null) {
 	          if (WorldGuardPlugin != null) {
-	              log.info(pluginName + ": WorldGuard Plugin found");
+	              log.info(pluginName + "WorldGuard Plugin found");
 	              WGP = (WorldGuardPlugin) WorldGuardPlugin;
 	              return true;
 	          } else {
-	              log.info(pluginName + ": WorldGuard not detected");
+	              log.info(pluginName + "WorldGuard not detected");
 	              return true;
 	          }
 	      }
-	      log.info("critical error in detecting WorldGuard. please advise author");
+	      log.info(pluginName + "critical error in detecting WorldGuard. please advise author");
 		return false;
 	  }
 
