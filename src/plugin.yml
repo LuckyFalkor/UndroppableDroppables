@@ -5,5 +5,5 @@ description: makes most things that don't drop something like bookcases well dro
 author: icomeinpieces
 commands:
     udreload:
-        description: test command.
+        description: reloads the configuration file
         usage: /<command>

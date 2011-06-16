@@ -10,25 +10,22 @@ import org.bukkit.inventory.ItemStack;
 public class UDVehicleListener extends VehicleListener
 {
 	public static UndroppableDroppables UDP;
+	Player player=null;
 	public UDVehicleListener(UndroppableDroppables instance)
 	{
 	    UDP = instance;
 	}
 
-	public void onVehicleDestroy(VehicleDestroyEvent event)
+    public void onVehicleDestroy(VehicleDestroyEvent event)
 	{
 		if (!event.isCancelled())
 		{
-			Player player = null;
 			if (event.getAttacker() instanceof Player) 
 			{
 				player = (Player) event.getAttacker();
 			}
-			else
-			{
-				UDP.log.info("UDP event trigger: non player attacker");
-			}
-			if (event.getVehicle() instanceof Boat && player!=null &&(UDP).permissionHandler.has(player, "ud.drop.boat"))
+
+			if (event.getVehicle() instanceof Boat && checkDrop("ud.drop.boat"))
 			{
 				Location locale = new Location(event.getVehicle().getWorld(), event.getVehicle().getLocation().getX(), event.getVehicle().getLocation().getY(), event.getVehicle().getLocation().getZ(), 0.0F, 0.0F);
 				if (!event.getVehicle().isEmpty())
@@ -58,5 +55,17 @@ public class UDVehicleListener extends VehicleListener
 				event.setCancelled(true);
 			}
 		}
+        player = null;
 	}
+    private boolean checkDrop(String permissionNode)
+    {
+        if (UDP.permissionsEnabaled)
+        {
+            return (UDP).permissionHandler.has(player, permissionNode);
+        }
+        else
+        {
+            return true;
+        }
+    }
 }

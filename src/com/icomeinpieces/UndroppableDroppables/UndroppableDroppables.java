@@ -21,6 +21,9 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 
 /*
  * Changelog:
+ * 1.16 included backup code for those who wish to continue to use permissions 2.7.4
+ * 1.15 fixed big brother issues with water, fixed item dupe bug introduced into v1.14, made corrections to detect water spawns.
+ * 1.14 fixed bug that prevented some other plugins (namely Big Brother) from properly detecting block breaks, changed how the water from ice breaks is detected
  * 1.13 added /udreload command to allow reloading the config file without having to do a server shutdown.
  * 1.12 fixed a bug that when a player didn't have a build permission due to permissions or worldguard, the plugin would spam console messages
  * 1.11 add per material permissions
@@ -39,14 +42,16 @@ import com.nijikokun.bukkit.Permissions.Permissions;
 
 public class UndroppableDroppables extends JavaPlugin{
 	public final Logger log = Logger.getLogger("Minecraft");
-	private final UDBlockListener udBlockListner = new UDBlockListener(this);
-	private final UDVehicleListener udVehicleListner = new UDVehicleListener(this);
+	public final UDVehicleListener udVehicleListner = new UDVehicleListener(this);
+	public final UDEntityListener udEntityListner = new UDEntityListener(this);
+    public final UDBlockListener udBlockListner = new UDBlockListener(this, udEntityListner);
 	public static WorldGuardPlugin WGP;
 	public PermissionHandler permissionHandler;
-	private PluginManager pm;
-	private final String pluginName = "UndroppableDroppables v1.13: ";
+	public PluginManager pm;
+	private final String pluginName = "UndroppableDroppables v1.16: ";
 	private String filePath = "/UndroppableDroppables.cfg";
 	private static UndroppableDroppables instance;
+	public Boolean permissionsEnabaled = false;
 	
 	
 	public Integer bookshelfDrop=1;
@@ -74,8 +79,9 @@ public class UndroppableDroppables extends JavaPlugin{
 		pm = getServer().getPluginManager();
 		pm.registerEvent(Event.Type.BLOCK_BREAK, this.udBlockListner, Event.Priority.Normal, this);
 		pm.registerEvent(Event.Type.VEHICLE_DESTROY, this.udVehicleListner, Event.Priority.Normal, this);
+		pm.registerEvent(Event.Type.ITEM_SPAWN, this.udEntityListner, Event.Priority.Normal, this);
 		setupWorldGuard();
-		setupPermissions();
+		permissionsEnabaled =setupPermissions();
 		Reload();
 		log.info(pluginName + "Enabled");
 	}
@@ -157,7 +163,7 @@ public class UndroppableDroppables extends JavaPlugin{
 		         out.println("glass="+glassDrop);
 		         out.println("#option 2 gives an ice block and allows water to spawn from the ice block normally");
 		         out.println("ice="+iceDrop);
-		         out.println("#option 2 gives seeds (just for fun), since grass is not built or crafted");
+		         out.println("#option 2 gives seeds and a dirt block(just for fun), since grass is not built or crafted");
 		         out.println("grass="+grassDrop);
 		         out.println("#option 2 gives 5 wooden planks back");
 		         out.println("boat="+boatDrop);
@@ -204,14 +210,21 @@ public class UndroppableDroppables extends JavaPlugin{
 			player = (Player) sender;
 			if (commandLabel.equalsIgnoreCase("udreload"))
 			{
-				if(permissionHandler.has(player, "ud.admin.reload") || player.isOp())
+				if (player.isOp())
 				{
 					Reload();
 					player.sendMessage(pluginName + "configuration reloaded");
 				}
 				else
 				{
-					player.sendMessage(pluginName + "you are not allowed to use the udreload command");
+					if (permissionsEnabaled && permissionHandler.has(player, "ud.admin.reload"))
+					{
+						player.sendMessage(pluginName + "configuration reloaded");
+					}
+					else
+					{
+						player.sendMessage(pluginName + "you are not allowed to use the udreload command");
+					}
 				}
 			}
 		}
@@ -221,14 +234,18 @@ public class UndroppableDroppables extends JavaPlugin{
 	private boolean setupPermissions() {
 	      Plugin permissionsPlugin = this.getServer().getPluginManager().getPlugin("Permissions");
 
-	      if (permissionHandler == null) {
-	          if (permissionsPlugin != null) {
+	      if (permissionHandler == null) 
+	      {
+	          if (permissionsPlugin != null) 
+	          {
 	              permissionHandler = ((Permissions) permissionsPlugin).getHandler();
 	              log.info(pluginName + "Permission system detected");
 	              return true;
-	          } else {
+	          } 
+	          else 
+	          {
 	              log.info(pluginName + "Permission system not detected");
-	              return true;
+	              return false;
 	          }
 	      }
 	      log.info(pluginName + "critical error in detecting Permissions. please advise author");
